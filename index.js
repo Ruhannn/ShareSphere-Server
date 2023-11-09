@@ -24,12 +24,10 @@ async function run() {
       res.send(result);
     });
     app.get("/services", async (req, res) => {
-      const result = await serviceCollection.find().toArray()
+      const result = await serviceCollection.find().toArray();
       res.send(result);
-    })
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    });
+    console.log("You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
