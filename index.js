@@ -52,6 +52,15 @@ async function run() {
       res.send(result);
     });
 
+    app.put("/update-service/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateData = req.body;
+      const result = await serviceCollection.updateOne(filter, {
+        $set: updateData,
+      });
+      res.send(result);
+    });
     console.log("You successfully connected to MongoDB!");
   } finally {
   }
