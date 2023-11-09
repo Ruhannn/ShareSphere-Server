@@ -61,6 +61,13 @@ async function run() {
       });
       res.send(result);
     });
+    app.delete("/service/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("delete data form data base", id);
+      const query = { _id: new ObjectId(id) };
+      const result = await serviceCollection.deleteOne(query);
+      res.send(result);
+    });
     console.log("You successfully connected to MongoDB!");
   } finally {
   }
