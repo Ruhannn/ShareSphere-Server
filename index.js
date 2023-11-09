@@ -15,6 +15,7 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
 async function run() {
   try {
     const serviceCollection = client.db("ShareSphere").collection("services");
@@ -27,8 +28,15 @@ async function run() {
     });
 
     app.get("/services", async (req, res) => {
-      const result = await serviceCollection.find().toArray();
-      res.send(result);
+      const email = req.query.email;
+      if (email) {
+        const query = { providerEmail: email };
+        const result = await serviceCollection.find(query).toArray();
+        res.send(result);
+      } else {
+        const result = await serviceCollection.find().toArray();
+        res.send(result);
+      }
     });
 
     app.get("/service/:id", async (req, res) => {
@@ -43,14 +51,18 @@ async function run() {
       const result = await bookingCollection.insertOne(bookingData);
       res.send(result);
     });
+
     console.log("You successfully connected to MongoDB!");
   } finally {
   }
 }
+
 run().catch(console.dir);
+
 app.get("/", (req, res) => {
-  res.send("i love ayaka");
+  res.send("I love Ayaka");
 });
+
 app.listen(port, () => {
   console.log(`Love Ayaka on ${port}`);
 });
