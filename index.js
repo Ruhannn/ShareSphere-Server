@@ -5,7 +5,9 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
 app.use(cors());
+
 app.use(express.json());
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.llm45p4.mongodb.net/?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, {
@@ -48,7 +50,28 @@ async function run() {
 
     app.post("/booking-service", async (req, res) => {
       const bookingData = req.body;
-      const result = await bookingCollection.insertOne(bookingData);
+      try {
+        const result = await bookingCollection.insertOne(bookingData);
+        res.send(result.ops);
+      } catch (error) {
+        console.error("Error inserting data:", error);
+      }
+    });
+
+    app.patch("/booking-service-update/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateData = req.body;
+      const result = await bookingCollection.updateOne(filter, {
+        $set: updateData,
+      });
+      res.send(result);
+    });
+
+    app.delete("/booking-service/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await bookingCollection.deleteOne(query);
       res.send(result);
     });
 
@@ -61,12 +84,39 @@ async function run() {
       });
       res.send(result);
     });
+
     app.delete("/service/:id", async (req, res) => {
       const id = req.params.id;
-      console.log("delete data form data base", id);
       const query = { _id: new ObjectId(id) };
       const result = await serviceCollection.deleteOne(query);
       res.send(result);
+    });
+
+    app.get("/booked-service", async (req, res) => {
+      const email = req.query.email;
+      if (email) {
+        const query = {
+          userEmail: email,
+        };
+        const result = await bookingCollection.find(query).toArray();
+        res.send(result);
+      } else {
+        const result = await bookingCollection.find().toArray();
+        res.send(result);
+      }
+    });
+    app.get("/pending-service", async (req, res) => {
+      const email = req.query.email;
+      if (email) {
+        const query = {
+          providerEmail: email,
+        };
+        const result = await bookingCollection.find(query).toArray();
+        res.send(result);
+      } else {
+        const result = await bookingCollection.find().toArray();
+        res.send(result);
+      }
     });
     console.log("You successfully connected to MongoDB!");
   } finally {
